@@ -1,0 +1,42 @@
+.device-check-container {
+  height: 100vh;
+  background: linear-gradient(to right, #f43f5e, #6366f1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.device-check-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.device-check-card h2 {
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.device-check-card p {
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.device-check-card button {
+  background-color: #6366f1;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.device-check-card button:hover {
+  background-color: #4f46e5;
+}
