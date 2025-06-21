@@ -5,8 +5,7 @@ const Dashboard = () => {
   const [logs, setLogs] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-useEffect(() => {
-  const fetchLogs = () => {
+  useEffect(() => {
     fetch('http://localhost:5000/api/logs')
       .then((res) => res.json())
       .then((data) => {
@@ -15,15 +14,7 @@ useEffect(() => {
           setLastUpdated(new Date().toLocaleString());
         }
       });
-  };
-
-  fetchLogs();
-  const interval = setInterval(fetchLogs, 5000);
-
-  return () => clearInterval(interval);
-}, []);
-
-
+  }, []);
 
   return (
     <div className="dashboard-container">
@@ -84,4 +75,3 @@ useEffect(() => {
 };
 
 export default Dashboard;
-

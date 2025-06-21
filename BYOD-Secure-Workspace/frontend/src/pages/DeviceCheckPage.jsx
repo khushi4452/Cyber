@@ -48,4 +48,3 @@ const DeviceCheckPage = () => {
 };
 
 export default DeviceCheckPage;
-
