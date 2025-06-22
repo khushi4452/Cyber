@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './DeviceCheckPage.css';
 
@@ -24,9 +24,15 @@ const DeviceCheckPage = () => {
       });
   }, []);
 
-  const handleContinue = () => {
+ const handleContinue = () => {
+  const role = localStorage.getItem('userRole');
+  if (role === 'admin') {
     navigate('/dashboard');
-  };
+  } else {
+    navigate('/employee');
+  }
+};
+
 
   return (
     <div className="device-check-container">

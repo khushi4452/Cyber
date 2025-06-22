@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
@@ -25,6 +25,10 @@ const LoginPage = () => {
     setTimeout(() => {
       console.log("Login successful. Navigating to /device-check");
       setLoading(false);
+
+      const role = empId === 'admin001' ? 'admin' : 'employee';
+      localStorage.setItem('userRole', role); // Store user role
+ 
       navigate('/device-check'); // ✅ Redirect
     }, 1500);
   };

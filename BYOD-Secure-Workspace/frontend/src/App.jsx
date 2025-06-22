@@ -1,8 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import DashboardLayout from "./components/DashboardLayout";
-import DashboardProfile from "./pages/DashboardProfile";
-import DashboardFiles from "./pages/DashboardFiles";
 import DashboardActivity from "./pages/DashboardActivity";
+import DashboardFiles from "./pages/DashboardFiles";
+import DashboardProfile from "./pages/DashboardProfile";
 
 function App() {
   return (
