@@ -8,11 +8,13 @@ const { createSecureFolder, folderPath } = require('../utils/folderControl');
 router.post('/check', (req, res) => {
   const osInfo = getOSInfo();
 
-  checkAntivirus((isAntivirusRunning) => {
+  checkAntivirus((status) => {
+    const { isAntivirusRunning, productName } = status;
+
     if (!isAntivirusRunning) {
       return res.status(403).json({
         success: false,
-        reason: 'Antivirus not running. Please enable Windows Defender.',
+        reason: 'No active antivirus found. Please enable an antivirus product.',
       });
     }
 
@@ -25,7 +27,7 @@ router.post('/check', (req, res) => {
         success: true,
         message: 'Device check passed. Secure folder created.',
         osInfo,
-        antivirus: 'Running',
+        antivirus: `Running (${productName})`,
         folder: folderPath,
       });
     });

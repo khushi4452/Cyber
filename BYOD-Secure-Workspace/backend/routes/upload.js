@@ -1,50 +1,88 @@
+// 📁 backend/routes/upload.js
+
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto'); // ✅ For encryption
 
 const router = express.Router();
 
 // ✅ Absolute upload directory (BYOD requirement)
 const uploadDir = 'C:/CyberSecure_Workspace';
 
-// Create the upload directory if it doesn't exist
+// ✅ Create the upload directory if it doesn't exist
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// ✅ Multer configuration to store files on disk
-const storage = multer.diskStorage({
+// ✅ Symmetric encryption config (use .env in production)
+const ENCRYPTION_KEY = crypto.createHash('sha256').update('byod-secret-key').digest();
+const IV_LENGTH = 16; // For AES, this is always 16
+
+// ✅ Encrypt file buffer using AES-256-CBC
+function encryptBuffer(buffer) {
+  const iv = crypto.randomBytes(IV_LENGTH);
+  const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
+  return Buffer.concat([iv, encrypted]); // prepend IV for decryption
+}
+
+// ✅ Decrypt buffer (used by frontend to view)
+function decryptBuffer(buffer) {
+  const iv = buffer.slice(0, IV_LENGTH);
+  const encryptedText = buffer.slice(IV_LENGTH);
+  const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+  return Buffer.concat([decipher.update(encryptedText), decipher.final()]);
+}
+
+// ✅ Multer config for encrypted (memory storage)
+const memoryStorage = multer.memoryStorage();
+const uploadEncrypted = multer({ storage: memoryStorage });
+
+// ✅ Multer config for raw (disk storage)
+const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
+    const timestamp = Date.now();
+    const safeName = file.originalname.replace(/\s+/g, '_');
+    cb(null, file.originalname);
   }
 });
-
-const upload = multer({ storage });
+const uploadRaw = multer({ storage: diskStorage });
 
 /**
  * @route POST /api/uploads
- * @desc Upload a file to C:/CyberSecure_Workspace
+ * @desc Encrypt and store uploaded file
  */
-router.post('/', upload.single('file'), (req, res) => {
+router.post('/', uploadEncrypted.single('file'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'No file uploaded' });
   }
 
-  return res.json({
-    success: true,
-    message: 'File uploaded successfully',
-    file: req.file.filename,
-    path: req.file.path
+  const encryptedBuffer = encryptBuffer(req.file.buffer);
+  const encryptedName = Date.now() + '-' + req.file.originalname + '.enc';
+  const filePath = path.join(uploadDir, encryptedName);
+
+  fs.writeFile(filePath, encryptedBuffer, (err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Failed to save encrypted file' });
+    }
+
+    return res.json({
+      success: true,
+      message: 'File encrypted and uploaded successfully',
+      file: encryptedName,
+      path: filePath
+    });
   });
 });
 
 /**
  * @route GET /api/uploads
- * @desc List uploaded files from C:/CyberSecure_Workspace
+ * @desc List all encrypted files
  */
 router.get('/', (req, res) => {
   fs.readdir(uploadDir, (err, files) => {
@@ -52,7 +90,59 @@ router.get('/', (req, res) => {
       return res.status(500).json({ success: false, message: 'Failed to read upload directory' });
     }
 
-    return res.json({ success: true, files });
+    const fileList = files.map((filename) => {
+      const filePath = path.join(uploadDir, filename);
+      const stats = fs.statSync(filePath);
+      return {
+        filename,
+        originalname: filename.split('-').slice(1).join('-'),
+        size: stats.size,
+        uploadedAt: stats.birthtime
+      };
+    });
+
+    return res.json({ success: true, files: fileList });
+  });
+});
+
+/**
+ * @route GET /api/uploads/:filename
+ * @desc Decrypt and serve file content
+ */
+router.get('/:filename', (req, res) => {
+  const filePath = path.join(uploadDir, req.params.filename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ success: false, message: 'File not found' });
+  }
+
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Failed to read file' });
+    }
+
+    try {
+      const decrypted = decryptBuffer(data);
+      res.send(decrypted);
+    } catch (e) {
+      res.status(500).json({ success: false, message: 'Decryption failed' });
+    }
+  });
+});
+
+/**
+ * @route DELETE /api/uploads/:filename
+ * @desc Instantly delete file
+ */
+router.delete('/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadDir, filename);
+
+  fs.unlink(filePath, (err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'File delete failed', error: err.message });
+    }
+
+    res.json({ success: true, message: 'File deleted' });
   });
 });
 
