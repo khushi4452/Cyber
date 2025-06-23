@@ -1,30 +1,37 @@
+// 📂 backend/server.js
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-// ✅ Import routes AFTER initializing app
+// ✅ Import routes
 const deviceRoutes = require('./routes/device');
-
+const adminRoutes = require('./routes/admin');
 const logsRoutes = require('./routes/logs');
-const uploadRoutes = require('./routes/upload'); // ✅ Add this line
+const uploadRoutes = require('./routes/upload');
 
+// ✅ Import suspiciousStatus object
+const { suspiciousStatus } = require('./folderWatcher');
 
-const app = express(); // ✅ You were missing this line
+const app = express();
 const PORT = 5000;
 
-// Middleware
+// ✅ Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.json()); // to parse application/json
+app.use(express.json());
 
-// ✅ Now it's safe to use app.use
-app.use('/api/device', deviceRoutes);
-// Routes
-app.use('/api/device', deviceRoutes);
-app.use('/api/logs', logsRoutes);
-app.use('/api/upload', uploadRoutes); // ✅ Mount upload route
+// ✅ Mount routes
+app.use('/api/device', deviceRoutes); // <- for device-specific routes
+app.use('/api/admin', adminRoutes);   // <- for admin-specific routes
+app.use('/api/logs', logsRoutes);     // <- for logs
+app.use('/api/upload', uploadRoutes); // <- for file uploads
 
-// Server start
+// ✅ API to check device status
+app.get('/api/device/status', (req, res) => {
+  res.json(suspiciousStatus);
+});
+
+// ✅ Server start
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
