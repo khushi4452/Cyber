@@ -122,6 +122,23 @@ router.get('/:filename', (req, res) => {
 
     try {
       const decrypted = decryptBuffer(data);
+       const content = decrypted.toString('utf8'); 
+
+      // ✅ Scan for sensitive terms
+  const sensitiveWords = ['confidential', 'salary', 'aadhaar', 'pan', 'secret'];
+  const found = sensitiveWords.find((word) => content.toLowerCase().includes(word));
+
+   if (found) {
+  res.setHeader('Content-Type', 'application/json');
+  return res.status(200).json({
+    sensitive: true,
+    message: `❗ This file contains sensitive data ("${found}") and cannot be previewed or downloaded.`,
+  });
+}
+
+
+  // ✅ No sensitive data found — send file
+  res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename.replace('.enc', '')}"`);
       res.send(decrypted);
     } catch (e) {
       res.status(500).json({ success: false, message: 'Decryption failed' });
