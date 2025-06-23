@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
 import axios from 'axios';
+import { useRef, useState } from 'react';
 import './Upload.css';
 
 const Upload = () => {
@@ -26,6 +26,7 @@ const Upload = () => {
       if (res.data.success) {
         setStatus(`✅ File uploaded: ${res.data.filename}`);
         setFile(null);
+        fileInputRef.current.value = ''; // reset file input
       } else {
         setStatus('❌ Upload failed.');
       }
@@ -43,7 +44,10 @@ const Upload = () => {
     <div className="upload-container dark">
       <div className="upload-card">
         <div className="upload-icon">
-          <img src="https://cdn-icons-png.flaticon.com/512/7249/7249198.png" alt="Upload" />
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/7249/7249198.png"
+            alt="Upload"
+          />
         </div>
         <h2 className="upload-title">Upload Your File</h2>
         <p className="upload-subtitle">Only secure work files are allowed.</p>

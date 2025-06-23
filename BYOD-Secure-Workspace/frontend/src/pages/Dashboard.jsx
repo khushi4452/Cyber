@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { Link, Routes, Route } from 'react-router-dom';
-import Upload from './Upload';
+import { useEffect, useState } from 'react';
+import { Link, Route, Routes } from 'react-router-dom';
 import './Dashboard.css';
+import Upload from './Upload';
+import UploadedFiles from './UploadedFiles';
 
-const DashboardHome = ({ logs, lastUpdated }) => (
+const DashboardHome = ({ logs, lastUpdated, uploadedFiles, showUploads, handleFilesClick }) => (
   <>
     <h1>📈 Admin Overview</h1>
 
@@ -16,11 +17,37 @@ const DashboardHome = ({ logs, lastUpdated }) => (
         <h3>Active Sessions</h3>
         <p>9 currently online</p>
       </div>
-      <div className="card orange">
+      <div className="card orange" onClick={handleFilesClick} style={{ cursor: 'pointer' }}>
         <h3>Files Uploaded</h3>
-        <p>18 uploaded today</p>
+        <p>{uploadedFiles.length} uploaded today</p>
       </div>
     </div>
+
+    {showUploads && (
+      <div className="uploaded-section">
+        <h2>📁 Uploaded Files</h2>
+        {uploadedFiles.length === 0 ? (
+          <p className="no-files">No files uploaded yet.</p>
+        ) : (
+          <ul className="uploaded-grid">
+            {uploadedFiles.map((file, index) => (
+              <li key={index} className="uploaded-card">
+                <div className="uploaded-header">
+                  <a
+                    href={`http://localhost:5000/uploads/${file.filename}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    📄 {file.originalname}
+                  </a>
+                </div>
+                <p className="upload-time">Uploaded at: {new Date(file.uploadedAt).toLocaleString()}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    )}
 
     <div className="grid-container">
       <div className="card-section">
@@ -75,6 +102,8 @@ const DashboardHome = ({ logs, lastUpdated }) => (
 const Dashboard = () => {
   const [logs, setLogs] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [showUploads, setShowUploads] = useState(false);
 
   useEffect(() => {
     const fetchLogs = () => {
@@ -88,27 +117,54 @@ const Dashboard = () => {
         })
         .catch((err) => console.error('Error fetching logs:', err));
     };
+
     fetchLogs();
     const interval = setInterval(fetchLogs, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  const handleFilesClick = () => {
+    const newState = !showUploads;
+    setShowUploads(newState);
+    if (newState) {
+      fetch('http://localhost:5000/api/upload')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) setUploadedFiles(data.files);
+        })
+        .catch((err) => console.error('Failed to fetch files:', err));
+    }
+  };
+
   return (
     <div className="dashboard">
       <aside className="sidebar">
         <h2>🛡 Admin</h2>
-        <nav>
-          <Link to="/dashboard">📊 Dashboard</Link>
-          <Link to="/dashboard/upload">📤 Upload</Link>
-          <Link to="/dashboard/logs">📜 Logs</Link>
+        <nav className="sidebar-nav">
+          <Link to="/dashboard" className="sidebar-link">📊 Dashboard</Link>
+          <Link to="/dashboard/upload" className="sidebar-link">📤 Upload</Link>
+          <Link to="/dashboard/Logs" className="sidebar-link">📂 Logs</Link>
+          <Link to="/dashboard/uploaded-files" className="sidebar-link">📂 Uploaded Files</Link>
         </nav>
         <button className="theme-toggle">🌙 Dark</button>
       </aside>
 
       <main className="content">
         <Routes>
-          <Route path="/" element={<DashboardHome logs={logs} lastUpdated={lastUpdated} />} />
+          <Route
+            path="/"
+            element={
+              <DashboardHome
+                logs={logs}
+                lastUpdated={lastUpdated}
+                uploadedFiles={uploadedFiles}
+                showUploads={showUploads}
+                handleFilesClick={handleFilesClick}
+              />
+            }
+          />
           <Route path="upload" element={<Upload />} />
+          <Route path="uploaded-files" element={<UploadedFiles />} />
         </Routes>
       </main>
     </div>
@@ -116,4 +172,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
