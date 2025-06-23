@@ -1,0 +1,20 @@
+.files-page {
+  padding: 1rem;
+}
+.files-list {
+  list-style-type: none;
+  padding: 0;
+}
+.file-item {
+  padding: 0.5rem;
+  background: var(--bg-color);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+.file-item a {
+  text-decoration: none;
+  color: var(--text-color);
+}
+.file-item a:hover {
+  text-decoration: underline;
+}

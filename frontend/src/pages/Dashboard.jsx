@@ -69,19 +69,6 @@ const DashboardHome = ({ logs, lastUpdated }) => (
         <p>No folder activity detected yet.</p>
       )}
     </div>
-
-    {/* 🔥 Added Wipe Request Button */}
-    <button
-      onClick={async () => {
-        await fetch('http://localhost:5000/api/admin/wipe-request', { method: 'POST' })
-          .then((res) => res.json())
-          .then((data) => alert('Wipe request sent'));
-      }}
-      className="bg-red-600 text-white px-4 py-2 rounded"
-      style={{ marginTop: '1rem' }}
-    >
-      🔥 Initiate Wipe
-    </button>
   </>
 );
 
@@ -129,3 +116,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
