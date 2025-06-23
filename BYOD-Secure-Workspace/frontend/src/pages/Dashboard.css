@@ -1,3 +1,17 @@
+.sidebar-link {
+  text-decoration: none;
+  padding: 10px 12px;
+  color: #fff;
+  background: #333;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.sidebar-link:hover {
+  background: #444;
+  color:  #90caf9c8;
+  transform: scale(1.03);
+}
 .dashboard {
   display: flex;
   font-family: 'Segoe UI', sans-serif;
@@ -99,4 +113,63 @@
 
 .log-table th {
   background-color: #2d2d2d;
+}
+.uploaded-section {
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  box-shadow: 0 4px 12px rgba(0, 255, 255, 0.05);
+}
+
+.uploaded-section h2 {
+  color:  #90caf9;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+}
+
+.no-files {
+  color: #aaa;
+  font-style: italic;
+  padding: 10px;
+}
+
+.uploaded-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.uploaded-card {
+  background-color: #2a2a2a;
+  padding: 16px;
+  border-radius: 10px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+.uploaded-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 12px  #90caf9;
+}
+
+.uploaded-header a {
+  font-weight: bold;
+  color:  #90caf9;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.uploaded-header a:hover {
+  text-decoration: underline;
+}
+
+.upload-time {
+  font-size: 0.85rem;
+  color: #bbb;
+  margin-top: 8px;
 }
