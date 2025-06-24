@@ -4,7 +4,7 @@ import './Dashboard.css';
 import Upload from './Upload';
 import UploadedFiles from './UploadedFiles';
 
-const DashboardHome = ({ logs, lastUpdated, uploadedFiles, showUploads, handleFilesClick }) => (
+const DashboardHome = ({ logs, lastUpdated, uploadedFiles, showUploads, handleFilesClick, alerts  }) => (
   <>
     <h1>📈 Admin Overview</h1>
 
@@ -66,6 +66,34 @@ const DashboardHome = ({ logs, lastUpdated, uploadedFiles, showUploads, handleFi
       </div>
     </div>
 
+
+   <div className="card full-width" style={{ marginTop: '2rem' }}>
+  <h2>🚨 UEBA Alerts</h2>
+  {alerts.length > 0 ? (
+    <table className="log-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>User</th>
+          <th>Issue</th>
+        </tr>
+      </thead>
+      <tbody>
+        {alerts.map((alert, index) => (
+          <tr key={index}>
+            <td>{alert.timestamp}</td>
+            <td>{alert.username}</td>
+            <td>{alert.issue}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ) : (
+    <p>✅ No suspicious activity detected.</p>
+  )}
+</div>
+
+
     <div className="card full-width">
       <h2>📁 Folder Activity Logs</h2>
       {logs.length > 0 ? (
@@ -78,24 +106,32 @@ const DashboardHome = ({ logs, lastUpdated, uploadedFiles, showUploads, handleFi
             </tr>
           </thead>
           <tbody>
-            {logs.map((log, index) => {
-              const parts = log.split('] ');
-              const timestamp = parts[0].replace('[', '');
-              const [activityType, filePath] = parts[1].split(': ');
-              return (
-                <tr key={index}>
-                  <td>{timestamp}</td>
-                  <td>{activityType}</td>
-                  <td>{filePath}</td>
-                </tr>
-              );
-            })}
+            
+           
+           {logs
+              .filter(log => log.timestamp && log.action && log.filename) // only complete logs
+              .map((log, index) => (
+           <tr key={index}>
+           <td>{log.timestamp}</td>
+          <td>{log.action}</td>
+          <td>{log.filename}</td>
+         </tr>
+        ))}
+
+
+
+
+
           </tbody>
         </table>
       ) : (
         <p>No folder activity detected yet.</p>
       )}
     </div>
+
+    
+    
+
 
     {/* 🔥 Added Wipe Request Button */}
     <button
@@ -118,6 +154,10 @@ const Dashboard = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [showUploads, setShowUploads] = useState(false);
 
+    //Nikhil Change
+    const [alerts, setAlerts] = useState([]);
+
+
   useEffect(() => {
     const fetchLogs = () => {
       fetch('http://localhost:5000/api/logs')
@@ -136,6 +176,28 @@ const Dashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  
+   
+  //Nikhil Change
+   useEffect(() => {
+  const fetchUEBAAlerts = () => {
+    fetch('http://localhost:5000/api/ueba-alerts')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setAlerts(data.alerts);
+        }
+      })
+      .catch((err) => console.error('Error fetching UEBA alerts:', err));
+  };
+
+  fetchUEBAAlerts(); // Initial call
+  const alertInterval = setInterval(fetchUEBAAlerts, 5000); // Poll every 5s
+
+  return () => clearInterval(alertInterval); // Cleanup on unmount
+}, []);
+
+
   const handleFilesClick = () => {
     const newState = !showUploads;
     setShowUploads(newState);
@@ -148,6 +210,7 @@ const Dashboard = () => {
         .catch((err) => console.error('Failed to fetch files:', err));
     }
   };
+
 
   return (
     <div className="dashboard">
@@ -173,6 +236,8 @@ const Dashboard = () => {
                 uploadedFiles={uploadedFiles}
                 showUploads={showUploads}
                 handleFilesClick={handleFilesClick}
+               //Nikhil Change
+                alerts={alerts} // 🆕 pass alerts here
               />
             }
           />
