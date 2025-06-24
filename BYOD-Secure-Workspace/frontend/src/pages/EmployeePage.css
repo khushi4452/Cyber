@@ -1,11 +1,20 @@
+/* Light Theme (Default) */
 .employee-page {
   max-width: 800px;
   margin: auto;
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
   background-color: #f8f9fa;
+  color: #111;
   border-radius: 10px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* 🌙 Dark Theme */
+.employee-page.dark-theme {
+  background-color: #1e1e2f;
+  color: #f5f5f5;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
 .file-dropdown {
@@ -15,6 +24,12 @@
   margin: 1rem 0;
   border-radius: 6px;
   border: 1px solid #ccc;
+}
+
+.employee-page.dark-theme .file-dropdown {
+  background-color: #2a2a40;
+  color: #f5f5f5;
+  border: 1px solid #555;
 }
 
 .file-preview {
@@ -27,46 +42,88 @@
   overflow-y: auto;
 }
 
+.employee-page.dark-theme .file-preview {
+  background-color: #2a2a40;
+  border: 1px solid #444;
+}
+
 .file-preview pre {
   white-space: pre-wrap;
   word-wrap: break-word;
   font-size: 0.95rem;
 }
 
+.employee-page.dark-theme .file-preview pre {
+  color: #ddd;
+}
 
 .download-button {
-margin-top: 10px;
-padding: 8px 16px;
-background-color: #3478f6;
-color: white;
-border: none;
-border-radius: 4px;
-cursor: pointer;
-}
-.download-button:hover {
-background-color: #245ec5;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #3478f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
+.download-button:hover {
+  background-color: #245ec5;
+}
+
+/* 🔍 Attractive Popup Overlay */
 .popup-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4); /* semi-transparent background */
+  background-color: rgba(20, 20, 20, 0.7);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
+  backdrop-filter: blur(4px);
 }
 
 .popup-content {
-  background: white;
+  background-color: #1e293b;
   padding: 30px 40px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  border-radius: 20px;
   text-align: center;
-  font-size: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  color: #f8fafc;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Loader Spinner */
+.popup-content::before {
+  content: "";
+  display: block;
+  margin: 0 auto 20px;
+  width: 50px;
+  height: 50px;
+  border: 6px solid #38bdf8;
+  border-top: 6px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .warning-banner {
@@ -90,8 +147,17 @@ background-color: #245ec5;
   margin-bottom: 1rem;
 }
 
+.error {
+  color: red;
+}
+
 @keyframes pulse {
   0% { opacity: 1; }
   100% { opacity: 0.7; }
+}
 
+@media print {
+  body {
+    display: none !important;
+  }
 }

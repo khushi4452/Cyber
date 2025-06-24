@@ -111,6 +111,8 @@ router.get('/', (req, res) => {
  */
 router.get('/:filename', (req, res) => {
   const filePath = path.join(uploadDir, req.params.filename);
+  const isDownload = req.query.download === 'true'; // ← we'll use this from frontend
+
   if (!fs.existsSync(filePath)) {
     return res.status(404).json({ success: false, message: 'File not found' });
   }
@@ -136,10 +138,28 @@ router.get('/:filename', (req, res) => {
   });
 }
 
+   // ✅ Log the user activity (either viewed or downloaded)
+             const logPath = path.join(__dirname, '../../folder-monitor/folder_log.csv');
 
-  // ✅ No sensitive data found — send file
-  res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename.replace('.enc', '')}"`);
-      res.send(decrypted);
+          // Add CSV header if not exists
+           if (!fs.existsSync(logPath)) {
+              fs.writeFileSync(logPath, 'timestamp,action,filename\n');
+               }
+
+           const username = 'employee'; // hardcode or get from session if auth exists
+           const logEntry = `${new Date().toISOString()},${username},${isDownload ? 'Downloaded' : 'Viewed'},${req.params.filename}\n`;
+           fs.appendFile(logPath, logEntry, () => {});
+
+
+      // ✅ Set response
+        if (isDownload) {
+            res.setHeader('Content-Disposition', `attachment; filename="${req.params.filename.replace('.enc', '')}"`);
+           return res.send(decrypted); // Send and exit
+        } else {
+             res.setHeader('Content-Type', 'text/plain');
+             return res.send(decrypted); // For preview
+          }
+
     } catch (e) {
       res.status(500).json({ success: false, message: 'Decryption failed' });
     }
